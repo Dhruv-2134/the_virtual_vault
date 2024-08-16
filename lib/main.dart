@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
       ],
       child: MaterialApp(
-        title: 'E-commerce App',
+        title: 'The Virtual Vault',
         theme: appTheme,
         initialRoute: '/',
         routes: {

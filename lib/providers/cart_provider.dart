@@ -16,7 +16,8 @@ class CartProvider with ChangeNotifier {
   int get itemCount => _items.length;
 
   double get totalAmount {
-    return _items.values.fold(0.0, (sum, item) => sum + (item.product.price * item.quantity));
+    return _items.values
+        .fold(0.0, (sum, item) => sum + (item.product.price * item.quantity));
   }
 
   void addItem(Product product) {
@@ -47,7 +48,57 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  order() {}
+  void decreaseQuantity(int productId) {
+    if (!_items.containsKey(productId)) return;
+    if (_items[productId]!.quantity > 1) {
+      _items.update(
+        productId,
+        (existingItem) => CartItem(
+          product: existingItem.product,
+          quantity: existingItem.quantity - 1,
+        ),
+      );
+    } else {
+      _items.remove(productId);
+    }
+    notifyListeners();
+  }
+
+  int get totalItemCount {
+    return _items.values.fold(0, (sum, item) => sum + item.quantity);
+  }
+
+  Future<bool> order() async {
+    try {
+      // Simulate sending order to a server
+      await Future.delayed(const Duration(seconds: 2));
+      
+      // Create order details
+      // ignore: unused_local_variable
+      final orderDetails = _items.entries.map((entry) {
+        return {
+          'productId': entry.key,
+          'productTitle': entry.value.product.title,
+          'quantity': entry.value.quantity,
+          'price': entry.value.product.price,
+        };
+      }).toList();
+
+      // Here you would typically send orderDetails to your backend
+      // For example:
+      // await api.sendOrder(orderDetails);
+
+      // Clear the cart after successful order
+      clear();
+      
+      return true; // Order placed successfully
+    } catch (error) {
+      if (kDebugMode) {
+        print('Error placing order: $error');
+      }
+      return false; // Order failed
+    }
+  }
 }
 
 

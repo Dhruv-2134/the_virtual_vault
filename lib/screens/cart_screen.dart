@@ -17,13 +17,15 @@ class CartScreen extends StatelessWidget {
           if (cart.items.isEmpty) {
             return const Center(child: Text('Your cart is empty'));
           }
-          return ListView.builder(
-            itemCount: cart.items.length,
-            itemBuilder: (ctx, i) => CartItemWidget(
-              cartItem: cart.items.values.toList()[i],
-              productId: cart.items.keys.toList()[i],
-            ),
-          );
+          return cart.items.isNotEmpty
+              ? ListView.builder(
+                  itemCount: cart.items.length,
+                  itemBuilder: (ctx, i) => CartItemWidget(
+                    cartItem: cart.items.values.toList()[i],
+                    productId: cart.items.keys.toList()[i],
+                  ),
+                )
+              : const Center(child: Text('Your cart is empty'));
         },
       ),
       bottomNavigationBar: Consumer<CartProvider>(
@@ -38,7 +40,8 @@ class CartScreen extends StatelessWidget {
                   children: [
                     Text(
                       'Total: \$${cart.totalAmount.toStringAsFixed(2)}',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     ElevatedButton(
                       onPressed: () => _showCheckoutDialog(context),
