@@ -28,7 +28,7 @@ This is a Flutter-based e-commerce application that demonstrates various feature
 
 3. Open the project folder:
 - Click on "File" > "Open Folder"
-- Navigate to the cloned `ecommerce_flutter_app` directory and select it
+- Navigate to the cloned `the_virtual_vault` directory and select it
 
 4. Install dependencies:
 - Open the VS Code integrated terminal (View > Terminal)

@@ -14,20 +14,9 @@ class SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    _searchController.addListener(_onSearchChanged);
-  }
-
-  @override
   void dispose() {
-    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
-  }
-
-  void _onSearchChanged() {
-    Provider.of<ProductProvider>(context, listen: false).searchProducts(_searchController.text);
   }
 
   @override
@@ -40,20 +29,38 @@ class SearchScreenState extends State<SearchScreen> {
             hintText: 'Search products...',
             border: InputBorder.none,
           ),
+          onChanged: (value) {
+            Provider.of<ProductProvider>(context, listen: false).searchProducts(value);
+          },
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.clear),
+            onPressed: () {
+              _searchController.clear();
+              Provider.of<ProductProvider>(context, listen: false).clearSearch();
+            },
+          ),
+        ],
       ),
       body: Consumer<ProductProvider>(
         builder: (context, productProvider, child) {
           if (productProvider.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (productProvider.products.isEmpty) {
+          
+          final displayedProducts = productProvider.currentSearchQuery.isNotEmpty
+              ? productProvider.searchResults
+              : productProvider.products;
+
+          if (displayedProducts.isEmpty) {
             return const Center(child: Text('No products found'));
           }
+          
           return ListView.builder(
-            itemCount: productProvider.products.length,
+            itemCount: displayedProducts.length,
             itemBuilder: (context, index) {
-              return ProductCard(product: productProvider.products[index]);
+              return ProductCard(product: displayedProducts[index]);
             },
           );
         },

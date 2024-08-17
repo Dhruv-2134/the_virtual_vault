@@ -3,13 +3,17 @@ import '../models/product.dart';
 import '../services/api_service.dart';
 
 class ProductProvider with ChangeNotifier {
-  List<Product> _products = [];
+  final List<Product> _products = [];
+  List<Product> _searchResults = [];
   bool _isLoading = false;
   int _currentPage = 1;
   final int _itemsPerPage = 10;
+  String _currentSearchQuery = '';
 
   List<Product> get products => _products;
+  List<Product> get searchResults => _searchResults;
   bool get isLoading => _isLoading;
+  String get currentSearchQuery => _currentSearchQuery;
 
   final ApiService _apiService = ApiService();
 
@@ -38,10 +42,15 @@ class ProductProvider with ChangeNotifier {
 
   Future<void> searchProducts(String query) async {
     _isLoading = true;
+    _currentSearchQuery = query;
     notifyListeners();
 
     try {
-      _products = await _apiService.searchProducts(query);
+      if (query.isEmpty) {
+        _searchResults = [];
+      } else {
+        _searchResults = await _apiService.searchProducts(query);
+      }
     } catch (error) {
       if (kDebugMode) {
         print('Error searching products: $error');
@@ -52,31 +61,9 @@ class ProductProvider with ChangeNotifier {
     }
   }
 
-  void sortProducts({required String sortBy, required bool ascending}) {
-    switch (sortBy) {
-      case 'price':
-        _products.sort((a, b) => ascending
-            ? a.price.compareTo(b.price)
-            : b.price.compareTo(a.price));
-        break;
-      case 'rating':
-        _products.sort((a, b) => ascending
-            ? a.rating['rate'].compareTo(b.rating['rate'])
-            : b.rating['rate'].compareTo(a.rating['rate']));
-        break;
-      // Add more sorting options as needed
-    }
-    notifyListeners();
-  }
-
-  void filterProducts({String? category, double? minPrice, double? maxPrice, double? minRating}) {
-    _products = _products.where((product) {
-      bool categoryMatch = category == null || product.category == category;
-      bool priceMatch = (minPrice == null || product.price >= minPrice) &&
-          (maxPrice == null || product.price <= maxPrice);
-      bool ratingMatch = minRating == null || product.rating['rate'] >= minRating;
-      return categoryMatch && priceMatch && ratingMatch;
-    }).toList();
+  void clearSearch() {
+    _searchResults = [];
+    _currentSearchQuery = '';
     notifyListeners();
   }
 }

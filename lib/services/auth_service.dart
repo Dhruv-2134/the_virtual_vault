@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 import '../models/user.dart';
@@ -28,6 +29,13 @@ class AuthService {
     );
 
     if (response.statusCode == 201) {
+      if (kDebugMode) {
+        print('Response status: ${response.statusCode}');
+      }
+      if (kDebugMode) {
+        print('Response body: ${response.body}');
+      }
+
       return User.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to register');

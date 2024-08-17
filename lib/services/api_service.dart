@@ -29,9 +29,9 @@ class ApiService {
     }
   }
 
-  Future<List<Product>> searchProducts(String query) async {
+  Future<List<Product>> searchProducts(String query, {int limit = 10, int offset = 0}) async {
     final response = await http.get(
-      Uri.parse('${ApiConfig.baseUrl}${ApiConfig.productsEndpoint}?title_like=$query'),
+      Uri.parse('${ApiConfig.baseUrl}${ApiConfig.productsEndpoint}?title_like=$query&limit=$limit&offset=$offset'),
     );
 
     if (response.statusCode == 200) {
