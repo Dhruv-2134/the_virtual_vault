@@ -1,43 +1,49 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import '../models/product.dart';
-import '../services/api_service.dart';
+import '../services/product_service.dart';
 
 class ProductProvider with ChangeNotifier {
-  final List<Product> _products = [];
+  List<Product> _products = [];
   List<Product> _searchResults = [];
   bool _isLoading = false;
-  int _currentPage = 1;
-  final int _itemsPerPage = 10;
+  int _page = 1;
+  String _sortBy = 'price';
+  String _filterCategory = '';
+  double _minPrice = 0;
+  double _maxPrice = double.infinity;
+  double _minRating = 0;
   String _currentSearchQuery = '';
 
-  List<Product> get products => _products;
+  List<Product> get products => _currentSearchQuery.isEmpty ? _products : _searchResults;
   List<Product> get searchResults => _searchResults;
-  bool get isLoading => _isLoading;
   String get currentSearchQuery => _currentSearchQuery;
+  String get filterCategory => _filterCategory;
+  String get sortBy => _sortBy;
+  bool get isLoading => _isLoading;
 
-  final ApiService _apiService = ApiService();
-
-  Future<void> fetchProducts() async {
-    if (_isLoading) return;
-
+  Future<void> fetchProducts({bool loadMore = false}) async {
+    if (loadMore) {
+      _page++;
+    } else {
+      _page = 1;
+      _products = [];
+    }
     _isLoading = true;
     notifyListeners();
 
-    try {
-      final newProducts = await _apiService.getProducts(
-        limit: _itemsPerPage,
-        offset: (_currentPage - 1) * _itemsPerPage,
-      );
-      _products.addAll(newProducts);
-      _currentPage++;
-    } catch (error) {
-      if (kDebugMode) {
-        print('Error fetching products: $error');
-      }
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
+    final newProducts = await ProductService.fetchProducts(
+      page: _page,
+      sortBy: _sortBy,
+      category: _filterCategory,
+      minPrice: _minPrice,
+      maxPrice: _maxPrice,
+      minRating: _minRating,
+    );
+
+    _products.addAll(newProducts);
+    _isLoading = false;
+    notifyListeners();
   }
 
   Future<void> searchProducts(String query) async {
@@ -49,7 +55,7 @@ class ProductProvider with ChangeNotifier {
       if (query.isEmpty) {
         _searchResults = [];
       } else {
-        _searchResults = await _apiService.searchProducts(query);
+        _searchResults = await ProductService.searchProducts(query);
       }
     } catch (error) {
       if (kDebugMode) {
@@ -65,5 +71,26 @@ class ProductProvider with ChangeNotifier {
     _searchResults = [];
     _currentSearchQuery = '';
     notifyListeners();
+  }
+
+  void setSortBy(String sortBy) {
+    _sortBy = sortBy;
+    fetchProducts();
+  }
+
+  void setFilterCategory(String category) {
+    _filterCategory = category;
+    fetchProducts();
+  }
+
+  void setPriceRange(double minPrice, double maxPrice) {
+    _minPrice = minPrice;
+    _maxPrice = maxPrice;
+    fetchProducts();
+  }
+
+  void setMinRating(double minRating) {
+    _minRating = minRating;
+    fetchProducts();
   }
 }

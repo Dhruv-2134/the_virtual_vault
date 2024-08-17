@@ -48,7 +48,7 @@ class SearchScreenState extends State<SearchScreen> {
           if (productProvider.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          
+
           final displayedProducts = productProvider.currentSearchQuery.isNotEmpty
               ? productProvider.searchResults
               : productProvider.products;
@@ -56,7 +56,7 @@ class SearchScreenState extends State<SearchScreen> {
           if (displayedProducts.isEmpty) {
             return const Center(child: Text('No products found'));
           }
-          
+
           return ListView.builder(
             itemCount: displayedProducts.length,
             itemBuilder: (context, index) {
